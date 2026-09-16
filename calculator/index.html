@@ -212,7 +212,9 @@ input:invalid { border:2px solid #b42318; }
 </table></div>
 
 
-<div class="section-title">2. 팔레트 수량</div>
+<div class="section-title">2. 팔레트 수량 (최대 20세트)</div>
+<p><label for="palletQty">팔레트 세트 수량</label> <input type="number" id="palletQty" value="0" min="0" max="20" step="1" required></p>
+<p>1세트 = 나무 1개 + 플라스틱 1개 · 랩핑/밴딩은 세트당 1kg</p>
 
 <div class="table-wrap"><table>
 
@@ -231,8 +233,7 @@ input:invalid { border:2px solid #b42318; }
                step="0.1"> kg
     </td>
     <td>
-        <input type="number" aria-label="나무 팔레트 수량" id="woodQty"
-               value="0" min="0">
+        <span id="woodQty">0</span> 개 (자동)
     </td>
     <td id="woodTotal">0.00 kg</td>
 </tr>
@@ -241,15 +242,14 @@ input:invalid { border:2px solid #b42318; }
     <td>플라스틱 팔레트</td>
     <td>5.76 kg</td>
     <td>
-        <input type="number" aria-label="플라스틱 팔레트 수량" id="plasticQty"
-               value="0" min="0">
+        <span id="plasticQty">0</span> 개 (자동)
     </td>
     <td id="plasticTotal">0.00 kg</td>
 </tr>
 
 <tr>
     <td>랩핑 / 밴딩</td>
-    <td>1.00 kg / Pallet</td>
+    <td>1.00 kg / 세트</td>
     <td id="packingQty">0</td>
     <td id="packingTotal">0.00 kg</td>
 </tr>
@@ -294,8 +294,8 @@ input:invalid { border:2px solid #b42318; }
 </div>
 
 <div class="result-row">
-    <span>총 팔레트</span>
-    <strong id="totalPallets">0 PALLET</strong>
+    <span>총 팔레트 세트</span>
+    <strong id="totalPallets">0 SET</strong>
 </div>
 
 <div class="result-row"
@@ -339,7 +339,7 @@ input:invalid { border:2px solid #b42318; }
 <div class="note">
 ※ 본 계산값은 Cargo Gross Weight 기준이며 컨테이너 자체 Tare Weight는 포함하지 않습니다.<br>
 ※ 나무 팔레트 실제 중량은 10~18kg 범위이므로 실제 Gross Weight에는 차이가 발생할 수 있습니다.<br>
-※ 랩핑/밴딩 포장재는 입력된 전체 팔레트 수량 × 1kg으로 계산됩니다.
+※ 나무·플라스틱 팔레트는 1:1로 사용하며 최대 20세트입니다. 랩핑/밴딩은 세트 수량 × 1kg으로 최대 20kg입니다.
 </div>
 
 </div>
@@ -370,7 +370,7 @@ function calculate() {
     const error = document.getElementById('inputError');
     error.hidden = !invalid;
     document.querySelector('.result').hidden = !!invalid;
-    if (invalid) { error.textContent = '수량은 0 이상의 정수, 나무 팔레트 중량은 10~18kg(0.1kg 단위)으로 입력해 주세요. 입력값은 10억 이하여야 합니다.'; return false; }
+    if (invalid) { error.textContent = '팔레트는 0~20세트의 정수, BOX 수량은 0 이상의 정수, 나무 팔레트 중량은 10~18kg(0.1kg 단위)으로 입력해 주세요. 입력값은 10억 이하여야 합니다.'; return false; }
     if (document.getElementById('woodWeight').value === '') { error.hidden=false; error.textContent='나무 팔레트 개당 중량을 입력해 주세요.'; document.querySelector('.result').hidden=true; return false; }
 
 
@@ -378,8 +378,11 @@ function calculate() {
     const box4 = val("box4");
     const box6 = val("box6");
 
-    const woodQty = val("woodQty");
-    const plasticQty = val("plasticQty");
+    const palletQty = val("palletQty");
+    const woodQty = palletQty;
+    const plasticQty = palletQty;
+    document.getElementById("woodQty").innerText = woodQty;
+    document.getElementById("plasticQty").innerText = plasticQty;
     const woodWeight = val("woodWeight");
 
     const weight1 = box1 * BOX_1_WEIGHT;
@@ -396,7 +399,7 @@ function calculate() {
         plasticQty * PLASTIC_WEIGHT;
 
     const totalPallets =
-        woodQty + plasticQty;
+        palletQty;
 
     const packingTotal =
         totalPallets * PACKING_WEIGHT;
@@ -452,7 +455,7 @@ function calculate() {
         (box1 + box4 + box6).toLocaleString() + " BOX";
 
     document.getElementById("totalPallets").innerText =
-        totalPallets.toLocaleString() + " PALLET";
+        totalPallets.toLocaleString() + " SET (나무 + 플라스틱)";
 
 
     document.getElementById("grossKg").innerText =
@@ -509,8 +512,7 @@ function resetForm() {
     document.getElementById("box4").value = 0;
     document.getElementById("box6").value = 0;
 
-    document.getElementById("woodQty").value = 0;
-    document.getElementById("plasticQty").value = 0;
+    document.getElementById("palletQty").value = 0;
 
     document.getElementById("woodWeight").value = 14;
 
@@ -531,7 +533,7 @@ async function copyResult() {
         "TOTAL BOX: " +
         document.getElementById("totalBoxes").innerText +
         "\n" +
-        "TOTAL PALLET: " +
+        "TOTAL PALLET SETS: " +
         document.getElementById("totalPallets").innerText;
 
     try {
