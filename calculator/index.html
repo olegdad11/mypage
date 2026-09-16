@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Container Packing Weight Calculator</title>
+
+<style>
+    body {
+        font-family: "Malgun Gothic", Arial, sans-serif;
+        background: #f3f6fa;
+        margin: 0;
+        padding: 25px;
+        color: #222;
+    }
+
+    .container {
+        max-width: 900px;
+        margin: auto;
+        background: white;
+        padding: 28px;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.12);
+    }
+
+    h1 {
+        margin-top: 0;
+        text-align: center;
+        color: #17365d;
+        font-size: 27px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 25px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 22px;
+    }
+
+    th {
+        background: #17365d;
+        color: white;
+        padding: 12px;
+        font-size: 15px;
+    }
+
+    td {
+        border-bottom: 1px solid #ddd;
+        padding: 11px;
+        text-align: center;
+    }
+
+    input {
+        width: 110px;
+        padding: 8px;
+        font-size: 16px;
+        text-align: right;
+        border: 1px solid #aaa;
+        border-radius: 5px;
+    }
+
+    .section-title {
+        font-size: 19px;
+        font-weight: bold;
+        color: #17365d;
+        margin: 25px 0 10px;
+    }
+
+    .result {
+        background: #edf4fc;
+        border: 2px solid #17365d;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 15px;
+    }
+
+    .main-weight {
+        font-size: 34px;
+        font-weight: bold;
+        color: #0b5394;
+        text-align: center;
+        margin: 10px 0 20px;
+    }
+
+    .result-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 3px;
+        border-bottom: 1px solid #ccd6e0;
+    }
+
+    .target-box {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .target {
+        flex: 1;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 17px;
+        font-weight: bold;
+    }
+
+    .target24 {
+        background: #fff2cc;
+    }
+
+    .target245 {
+        background: #d9ead3;
+    }
+
+    .range {
+        background: #f7f7f7;
+        padding: 12px;
+        margin-top: 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .buttons {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    button {
+        background: #17365d;
+        color: white;
+        border: none;
+        padding: 11px 25px;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        margin: 5px;
+    }
+
+    button:hover {
+        background: #274e75;
+    }
+
+    .note {
+        color: #777;
+        font-size: 13px;
+        margin-top: 20px;
+        line-height: 1.6;
+    }
+input:invalid { border:2px solid #b42318; }
+.error { color:#b42318; margin:12px 0; }
+.table-wrap { overflow-x:auto; }
+@media(max-width:600px){ body{padding:10px;} .container{padding:16px;} h1{font-size:22px;} .target-box{flex-direction:column;} input{width:80px;} th,td{padding:8px;} .main-weight{font-size:28px;} }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Container Packing Weight Calculator</h1>
+<div class="subtitle">
+엔진오일 컨테이너 예상 Cargo Gross Weight 계산기
+</div>
+
+
+<div class="section-title">1. 엔진오일 박스 수량</div>
+
+<div class="table-wrap"><table>
+<tr>
+    <th>제품</th>
+    <th>품번</th>
+    <th>BOX G.Weight</th>
+    <th>BOX 수량</th>
+    <th>총 중량</th>
+</tr>
+
+<tr>
+    <td>1L 엔진오일</td>
+    <td>04500-00115</td>
+    <td>11.72 kg</td>
+    <td>
+        <input type="number" aria-label="1L 엔진오일 BOX 수량" id="box1" value="0" min="0">
+    </td>
+    <td id="weight1">0.00 kg</td>
+</tr>
+
+<tr>
+    <td>4L 엔진오일</td>
+    <td>04500-00400</td>
+    <td>15.06 kg</td>
+    <td>
+        <input type="number" aria-label="4L 엔진오일 BOX 수량" id="box4" value="0" min="0">
+    </td>
+    <td id="weight4">0.00 kg</td>
+</tr>
+
+<tr>
+    <td>6L 엔진오일</td>
+    <td>05200-00611</td>
+    <td>16.84 kg</td>
+    <td>
+        <input type="number" aria-label="6L 엔진오일 BOX 수량" id="box6" value="0" min="0">
+    </td>
+    <td id="weight6">0.00 kg</td>
+</tr>
+
+</table></div>
+
+
+<div class="section-title">2. 팔레트 수량</div>
+
+<div class="table-wrap"><table>
+
+<tr>
+    <th>구분</th>
+    <th>개당 중량</th>
+    <th>수량</th>
+    <th>계산 중량</th>
+</tr>
+
+<tr>
+    <td>나무 팔레트</td>
+    <td>
+        <input type="number" aria-label="나무 팔레트 개당 중량 kg" id="woodWeight"
+               value="14" min="10" max="18"
+               step="0.1"> kg
+    </td>
+    <td>
+        <input type="number" aria-label="나무 팔레트 수량" id="woodQty"
+               value="0" min="0">
+    </td>
+    <td id="woodTotal">0.00 kg</td>
+</tr>
+
+<tr>
+    <td>플라스틱 팔레트</td>
+    <td>5.76 kg</td>
+    <td>
+        <input type="number" aria-label="플라스틱 팔레트 수량" id="plasticQty"
+               value="0" min="0">
+    </td>
+    <td id="plasticTotal">0.00 kg</td>
+</tr>
+
+<tr>
+    <td>랩핑 / 밴딩</td>
+    <td>1.00 kg / Pallet</td>
+    <td id="packingQty">0</td>
+    <td id="packingTotal">0.00 kg</td>
+</tr>
+
+</table></div>
+
+
+<div id="inputError" class="error" role="alert" hidden></div>
+<div class="result">
+
+<div style="text-align:center;font-size:18px;font-weight:bold;">
+예상 Cargo Gross Weight
+</div>
+
+<div class="main-weight" id="grossTon">
+0.000 TON
+</div>
+
+<div class="result-row">
+    <span>엔진오일 완제품</span>
+    <strong id="productWeight">0.00 kg</strong>
+</div>
+
+<div class="result-row">
+    <span>나무 팔레트</span>
+    <strong id="woodResult">0.00 kg</strong>
+</div>
+
+<div class="result-row">
+    <span>플라스틱 팔레트</span>
+    <strong id="plasticResult">0.00 kg</strong>
+</div>
+
+<div class="result-row">
+    <span>랩핑 / 밴딩</span>
+    <strong id="packingResult">0.00 kg</strong>
+</div>
+
+<div class="result-row">
+    <span>총 BOX</span>
+    <strong id="totalBoxes">0 BOX</strong>
+</div>
+
+<div class="result-row">
+    <span>총 팔레트</span>
+    <strong id="totalPallets">0 PALLET</strong>
+</div>
+
+<div class="result-row"
+     style="font-size:19px;border-bottom:none;margin-top:8px;">
+    <span><strong>TOTAL GROSS</strong></span>
+    <strong id="grossKg">0.00 kg</strong>
+</div>
+
+
+<div class="target-box">
+
+<div class="target target24">
+24 TON 기준<br>
+<span id="target24">24,000 kg 남음</span>
+</div>
+
+<div class="target target245">
+24.5 TON 기준<br>
+<span id="target245">24,500 kg 남음</span>
+</div>
+
+</div>
+
+
+<div class="range">
+나무 팔레트 중량 편차(10~18kg)를 고려한 예상 범위<br><br>
+<strong id="rangeResult">
+0.000 ~ 0.000 TON
+</strong>
+</div>
+
+</div>
+
+
+<div class="buttons">
+<button onclick="resetForm()">초기화</button>
+<button onclick="copyResult()">결과 복사</button>
+</div>
+
+
+<div class="note">
+※ 본 계산값은 Cargo Gross Weight 기준이며 컨테이너 자체 Tare Weight는 포함하지 않습니다.<br>
+※ 나무 팔레트 실제 중량은 10~18kg 범위이므로 실제 Gross Weight에는 차이가 발생할 수 있습니다.<br>
+※ 랩핑/밴딩 포장재는 입력된 전체 팔레트 수량 × 1kg으로 계산됩니다.
+</div>
+
+</div>
+
+
+<script>
+
+const BOX_1_WEIGHT = 11.72;
+const BOX_4_WEIGHT = 15.06;
+const BOX_6_WEIGHT = 16.84;
+
+const PLASTIC_WEIGHT = 5.76;
+const PACKING_WEIGHT = 1.00;
+
+function val(id) {
+    return Number(document.getElementById(id).value) || 0;
+}
+
+function fmt(num) {
+    return num.toLocaleString("ko-KR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    });
+}
+
+function calculate() {
+    const invalid = [...document.querySelectorAll('input')].find(input => !input.validity.valid || !Number.isFinite(Number(input.value)) || (input.value !== '' && Math.abs(Number(input.value)) > 1000000000));
+    const error = document.getElementById('inputError');
+    error.hidden = !invalid;
+    document.querySelector('.result').hidden = !!invalid;
+    if (invalid) { error.textContent = '수량은 0 이상의 정수, 나무 팔레트 중량은 10~18kg(0.1kg 단위)으로 입력해 주세요. 입력값은 10억 이하여야 합니다.'; return false; }
+    if (document.getElementById('woodWeight').value === '') { error.hidden=false; error.textContent='나무 팔레트 개당 중량을 입력해 주세요.'; document.querySelector('.result').hidden=true; return false; }
+
+
+    const box1 = val("box1");
+    const box4 = val("box4");
+    const box6 = val("box6");
+
+    const woodQty = val("woodQty");
+    const plasticQty = val("plasticQty");
+    const woodWeight = val("woodWeight");
+
+    const weight1 = box1 * BOX_1_WEIGHT;
+    const weight4 = box4 * BOX_4_WEIGHT;
+    const weight6 = box6 * BOX_6_WEIGHT;
+
+    const productWeight =
+        weight1 + weight4 + weight6;
+
+    const woodTotal =
+        woodQty * woodWeight;
+
+    const plasticTotal =
+        plasticQty * PLASTIC_WEIGHT;
+
+    const totalPallets =
+        woodQty + plasticQty;
+
+    const packingTotal =
+        totalPallets * PACKING_WEIGHT;
+
+    const gross =
+        productWeight +
+        woodTotal +
+        plasticTotal +
+        packingTotal;
+
+    const grossTon =
+        gross / 1000;
+
+
+    document.getElementById("weight1").innerText =
+        fmt(weight1) + " kg";
+
+    document.getElementById("weight4").innerText =
+        fmt(weight4) + " kg";
+
+    document.getElementById("weight6").innerText =
+        fmt(weight6) + " kg";
+
+
+    document.getElementById("woodTotal").innerText =
+        fmt(woodTotal) + " kg";
+
+    document.getElementById("plasticTotal").innerText =
+        fmt(plasticTotal) + " kg";
+
+
+    document.getElementById("packingQty").innerText =
+        totalPallets;
+
+    document.getElementById("packingTotal").innerText =
+        fmt(packingTotal) + " kg";
+
+
+    document.getElementById("productWeight").innerText =
+        fmt(productWeight) + " kg";
+
+    document.getElementById("woodResult").innerText =
+        fmt(woodTotal) + " kg";
+
+    document.getElementById("plasticResult").innerText =
+        fmt(plasticTotal) + " kg";
+
+    document.getElementById("packingResult").innerText =
+        fmt(packingTotal) + " kg";
+
+
+    document.getElementById("totalBoxes").innerText =
+        (box1 + box4 + box6).toLocaleString() + " BOX";
+
+    document.getElementById("totalPallets").innerText =
+        totalPallets.toLocaleString() + " PALLET";
+
+
+    document.getElementById("grossKg").innerText =
+        fmt(gross) + " kg";
+
+    document.getElementById("grossTon").innerText =
+        grossTon.toFixed(3) + " TON";
+
+
+    showTarget("target24", 24000, gross);
+    showTarget("target245", 24500, gross);
+
+
+    const minGross =
+        productWeight +
+        (woodQty * 10) +
+        plasticTotal +
+        packingTotal;
+
+    const maxGross =
+        productWeight +
+        (woodQty * 18) +
+        plasticTotal +
+        packingTotal;
+
+    document.getElementById("rangeResult").innerText =
+        (minGross / 1000).toFixed(3) +
+        " ~ " +
+        (maxGross / 1000).toFixed(3) +
+        " TON";
+}
+
+
+function showTarget(id, target, gross) {
+
+    const diff = target - gross;
+
+    if (diff > 0) {
+        document.getElementById(id).innerText =
+            fmt(diff) + " kg 남음";
+    } else if (diff < 0) {
+        document.getElementById(id).innerText =
+            fmt(Math.abs(diff)) + " kg 초과";
+    } else {
+        document.getElementById(id).innerText =
+            "목표 중량 도달";
+    }
+}
+
+
+function resetForm() {
+
+    document.getElementById("box1").value = 0;
+    document.getElementById("box4").value = 0;
+    document.getElementById("box6").value = 0;
+
+    document.getElementById("woodQty").value = 0;
+    document.getElementById("plasticQty").value = 0;
+
+    document.getElementById("woodWeight").value = 14;
+
+    calculate();
+}
+
+
+async function copyResult() {
+    if (calculate() === false) return;
+
+    const text =
+        "Container Packing Weight\n" +
+        "TOTAL GROSS: " +
+        document.getElementById("grossKg").innerText +
+        " (" +
+        document.getElementById("grossTon").innerText +
+        ")\n" +
+        "TOTAL BOX: " +
+        document.getElementById("totalBoxes").innerText +
+        "\n" +
+        "TOTAL PALLET: " +
+        document.getElementById("totalPallets").innerText;
+
+    try {
+        await navigator.clipboard.writeText(text);
+        alert('계산 결과를 복사했습니다.');
+    } catch (error) {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('aria-label', '복사할 계산 결과');
+        document.querySelector('.buttons').appendChild(area);
+        area.select();
+        alert('자동 복사를 사용할 수 없습니다. 표시된 결과를 선택해 직접 복사해 주세요.');
+    }
+}
+
+
+document.querySelectorAll("input").forEach(function(input) {
+    input.addEventListener("input", calculate);
+});
+
+calculate();
+
+</script>
+
+</body>
+</html>
+
+
